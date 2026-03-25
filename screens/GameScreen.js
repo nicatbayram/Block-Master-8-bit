@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { View, StyleSheet, Dimensions } from 'react-native';
+import { useIsFocused } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useGameState } from '../hooks/useGameState';
 import { useHighScore } from '../hooks/useHighScore';
@@ -23,6 +24,7 @@ const GameScreen = ({ navigation }) => {
   
   const { highScore, saveHighScore } = useHighScore();
   const boardRef = useRef(null);
+  const lastGhostPosRef = useRef(null);
   const [boardLayout, setBoardLayout] = useState({ x: 0, y: 0 });
 
   const [ghost, setGhost] = useState(null);
@@ -38,12 +40,14 @@ const GameScreen = ({ navigation }) => {
     }
   }, [lastAddedScore, comboCount]);
 
+  const isFocused = useIsFocused();
+  
   useEffect(() => {
-    if (isGameOver) {
+    if (isGameOver && isFocused) {
       saveHighScore(score);
       navigation.navigate('GameOver', { score, isNewRecord: score > highScore });
     }
-  }, [isGameOver, score, highScore, saveHighScore, navigation]);
+  }, [isGameOver, score, highScore, saveHighScore, navigation, isFocused]);
 
   const measureBoard = () => {
     if (boardRef.current) {
@@ -75,6 +79,10 @@ const GameScreen = ({ navigation }) => {
   const handleDragUpdate = (absoluteX, absoluteY, piece, index) => {
     const { row, col } = calculateGridPos(absoluteX, absoluteY, piece);
     
+    const posKey = `${row},${col}`;
+    if (lastGhostPosRef.current === posKey) return; // Prevent stutter - no state update if within the same cell!
+    lastGhostPosRef.current = posKey;
+
     if (canPlacePiece(board, piece.shape, row, col)) {
       setGhost({ piece, row, col });
     } else {
@@ -87,6 +95,7 @@ const GameScreen = ({ navigation }) => {
        handlePlacePiece(index, ghost.row, ghost.col);
     }
     setGhost(null);
+    lastGhostPosRef.current = null;
   };
 
   return (

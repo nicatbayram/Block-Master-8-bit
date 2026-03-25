@@ -32,7 +32,7 @@ export const darkTheme = {
   boardBg: '#000000',
   emptyCellBg: '#000000',
   emptyCellBorder: '#7A00CC', // user requested to be purple (not gray)
-  gridLines: '#1A1A1A',
+  gridLines: '#4A4A4A',
   block: '#7a04c9ff', // user requested small piece blocks to be purple
   textPrimary: '#A020F0', 
   textSecondary: '#C56BFF',

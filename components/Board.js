@@ -79,7 +79,7 @@ const getStyles = (COLORS) => StyleSheet.create({
    },
    cellBackground: {
      borderWidth: 1,
-     borderColor: '#EEEEEE',
+     borderColor: COLORS.gridLines,
      backgroundColor: 'transparent', 
    }
 });

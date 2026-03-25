@@ -1,17 +1,39 @@
 export const SHAPES = {
   DOT: { blocks: [[1]] },
-  SQUARE: { blocks: [[1, 1], [1, 1]] },
+  
+  LINE_2_H: { blocks: [[1, 1]] },
+  LINE_2_V: { blocks: [[1], [1]] },
+  
   LINE_3_H: { blocks: [[1, 1, 1]] },
   LINE_3_V: { blocks: [[1], [1], [1]] },
-  L_SHAPE_1: { blocks: [[1, 0], [1, 1]] },
-  L_SHAPE_2: { blocks: [[0, 1], [1, 1]] },
-  L_SHAPE_3: { blocks: [[1, 1], [1, 0]] },
-  L_SHAPE_4: { blocks: [[1, 1], [0, 1]] },
+  
   LINE_4_H: { blocks: [[1, 1, 1, 1]] },
   LINE_4_V: { blocks: [[1], [1], [1], [1]] },
+  
+  LINE_5_H: { blocks: [[1, 1, 1, 1, 1]] },
+  LINE_5_V: { blocks: [[1], [1], [1], [1], [1]] },
+
+  SQUARE_2: { blocks: [[1, 1], [1, 1]] },
+
+  // Small L-Shapes (Corner in all 4 directions)
+  L_SMALL_TR: { blocks: [[1, 1], [0, 1]] },
+  L_SMALL_TL: { blocks: [[1, 1], [1, 0]] },
+  L_SMALL_BR: { blocks: [[0, 1], [1, 1]] },
+  L_SMALL_BL: { blocks: [[1, 0], [1, 1]] },
+
+  // Large L-Shapes (Corner in all 4 directions)
+  L_LARGE_TR: { blocks: [[1, 1, 1], [0, 0, 1], [0, 0, 1]] },
+  L_LARGE_TL: { blocks: [[1, 1, 1], [1, 0, 0], [1, 0, 0]] },
+  L_LARGE_BR: { blocks: [[0, 0, 1], [0, 0, 1], [1, 1, 1]] },
+  L_LARGE_BL: { blocks: [[1, 0, 0], [1, 0, 0], [1, 1, 1]] },
+
+  // T-Shapes (All 4 directions)
+  T_UP: { blocks: [[0, 1, 0], [1, 1, 1]] },
+  T_DOWN: { blocks: [[1, 1, 1], [0, 1, 0]] },
+  T_LEFT: { blocks: [[0, 1], [1, 1], [0, 1]] },
+  T_RIGHT: { blocks: [[1, 0], [1, 1], [1, 0]] },
+
   CROSS: { blocks: [[0, 1, 0], [1, 1, 1], [0, 1, 0]] },
-  T_SHAPE_U: { blocks: [[1, 1, 1], [0, 1, 0]] },
-  T_SHAPE_D: { blocks: [[0, 1, 0], [1, 1, 1]] }
 };
 
 const SHAPE_KEYS = Object.keys(SHAPES);

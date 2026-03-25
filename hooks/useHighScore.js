@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const useHighScore = () => {
@@ -16,7 +16,7 @@ export const useHighScore = () => {
     loadHighScore();
   }, []);
 
-  const saveHighScore = async (newScore) => {
+  const saveHighScore = useCallback(async (newScore) => {
     try {
       if (newScore > highScore) {
         setHighScore(newScore);
@@ -27,7 +27,7 @@ export const useHighScore = () => {
       console.error('Failed to save high score', e);
     }
     return false;
-  };
+  }, [highScore]);
 
   return { highScore, saveHighScore };
 };

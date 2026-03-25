@@ -27,8 +27,8 @@ const Piece = ({ piece, onDragEnd, onDragUpdate, index }) => {
     })
     .onEnd((event) => {
       isDragging.value = false;
-      translateX.value = withSpring(0);
-      translateY.value = withSpring(0);
+      translateX.value = withSpring(0, { damping: 14, stiffness: 150 });
+      translateY.value = withSpring(0, { damping: 14, stiffness: 150 });
       
       if (onDragEnd) {
         runOnJS(onDragEnd)(event.absoluteX, event.absoluteY - 80, piece, index);
@@ -40,14 +40,22 @@ const Piece = ({ piece, onDragEnd, onDragUpdate, index }) => {
       transform: [
         { translateX: translateX.value },
         { translateY: translateY.value },
-        { scale: withSpring(isDragging.value ? 1.1 / PIECE_SCALE : 1, { 
-            damping: 15, 
-            stiffness: 120 
+        { scale: withSpring(isDragging.value ? 1.15 / PIECE_SCALE : 1, { 
+            damping: 14, 
+            stiffness: 150 
           }) 
         }
       ],
       zIndex: isDragging.value ? 1000 : 1,
       opacity: withTiming(isDragging.value ? 0.9 : 1, { duration: 150 }),
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: withTiming(isDragging.value ? 12 : 0, { duration: 150 }),
+      },
+      shadowOpacity: withTiming(isDragging.value ? 0.5 : 0, { duration: 150 }),
+      shadowRadius: withTiming(isDragging.value ? 15 : 0, { duration: 150 }),
+      elevation: isDragging.value ? 15 : 0,
     };
   });
 
