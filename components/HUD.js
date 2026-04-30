@@ -10,7 +10,7 @@ const HUD = ({ score, highScore, onSettings, onPause, isPaused }) => {
     <View style={styles.container}>
       <View style={styles.headerRow}>
         <View style={styles.scoreContainer}>
-          <Text style={styles.scoreLabel}>HI</Text>
+          <Text style={styles.scoreLabel}>HIGH</Text>
           <Text style={styles.scoreValue}>{highScore.toString().padStart(6, '0')}</Text>
         </View>
 
@@ -44,27 +44,28 @@ const getStyles = (COLORS) => StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 60,
+    height: 70, // Increased height to fit stacked texts
     borderBottomWidth: 2,
     borderBottomColor: COLORS.textPrimary,
-    paddingBottom: 8,
+    paddingBottom: 10,
   },
   buttonGroup: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   scoreContainer: {
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    flex: 1,
   },
   scoreLabel: {
     fontFamily: 'PressStart2P',
     fontSize: 10,
     color: COLORS.textPrimary,
-    marginBottom: 4,
+    marginBottom: 6,
   },
   scoreValue: {
     fontFamily: 'PressStart2P',
-    fontSize: 16,
+    fontSize: 12, // Reduced from 16 to fit 12 zeros without overlap
     color: COLORS.textPrimary,
   },
   iconButton: {

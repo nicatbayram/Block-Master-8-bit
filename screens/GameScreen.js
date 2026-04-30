@@ -1,7 +1,8 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet, Dimensions, Text, TouchableOpacity } from 'react-native';
 import { useIsFocused } from '@react-navigation/native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Animated, { useSharedValue, useAnimatedStyle, withSequence, withTiming } from 'react-native-reanimated';
 import { useGameState } from '../hooks/useGameState';
 import { useHighScore } from '../hooks/useHighScore';
 import Board, { CELL_SIZE } from '../components/Board';
@@ -13,14 +14,17 @@ import { canPlacePiece } from '../utils/boardLogic';
 import { useTheme } from '../contexts/ThemeContext';
 import { BLOCK_COLORS_LIGHT, BLOCK_COLORS_DARK } from '../constants/colors';
 import audio from '../utils/audio';
+import CRTOverlay from '../components/CRTOverlay';
+import PowerUps from '../components/PowerUps';
+import ParticleSystem from '../components/ParticleSystem';
 
 const GameScreen = ({ navigation }) => {
   const { colors: COLORS } = useTheme();
   const styles = getStyles(COLORS);
   const { 
     board, score, comboCount, lastLinesCleared, lastAddedScore, 
-    trayPieces, isGameOver, isPaused, clearedAreas,
-    handlePlacePiece, resetGame, togglePause 
+    trayPieces, isGameOver, isPaused, clearedAreas, turnsLeft, rerollsLeft,
+    handlePlacePiece, handleGravityFlip, handleReroll, resetGame, togglePause 
   } = useGameState();
   
   const { highScore, saveHighScore } = useHighScore();
@@ -44,6 +48,22 @@ const GameScreen = ({ navigation }) => {
       setShowCombo({ count: comboCount, id: `combo-${Date.now()}` });
     }
   }, [lastAddedScore, comboCount]);
+
+  const shakeTranslateX = useSharedValue(0);
+  useEffect(() => {
+    if (clearedAreas) {
+      shakeTranslateX.value = withSequence(
+        withTiming(-8, { duration: 50 }),
+        withTiming(8, { duration: 50 }),
+        withTiming(-8, { duration: 50 }),
+        withTiming(0, { duration: 50 })
+      );
+    }
+  }, [clearedAreas]);
+
+  const animatedBoardStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: shakeTranslateX.value }]
+  }));
 
   const isFocused = useIsFocused();
   
@@ -109,13 +129,13 @@ const GameScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <HUD 
         score={score} 
-        highScore={highScore} 
+        highScore={Math.max(score, highScore)} 
         onSettings={() => navigation.navigate('Settings')}
         onPause={togglePause}
         isPaused={isPaused}
       />
       
-      <View style={styles.boardWrapper}>
+      <Animated.View style={[styles.boardWrapper, animatedBoardStyle]}>
          <Board 
            ref={boardRef}
            onGridLayout={measureBoard}
@@ -124,6 +144,7 @@ const GameScreen = ({ navigation }) => {
            ghostPos={ghost ? { row: ghost.row, col: ghost.col } : null}
            clearedAreas={clearedAreas}
          />
+         <ParticleSystem clearedAreas={clearedAreas} />
          
          {showScore && (
            <FloatingScore 
@@ -144,9 +165,25 @@ const GameScreen = ({ navigation }) => {
          {isPaused && (
            <View style={styles.pauseOverlay}>
              <Text style={styles.pauseText}>PAUSED</Text>
+             <TouchableOpacity 
+               style={styles.pauseButton}
+               onPress={() => {
+                 togglePause();
+                 navigation.navigate('Home');
+               }}
+             >
+               <Text style={styles.pauseButtonText}>MAIN MENU</Text>
+             </TouchableOpacity>
            </View>
          )}
-      </View>
+      </Animated.View>
+
+      <PowerUps 
+        onGravityFlip={handleGravityFlip} 
+        onReroll={handleReroll} 
+        turnsLeft={turnsLeft} 
+        rerollsLeft={rerollsLeft}
+      />
 
       <View style={styles.trayWrapper}>
          <PieceTray 
@@ -155,6 +192,7 @@ const GameScreen = ({ navigation }) => {
            onDragEnd={handleDragEnd}
          />
       </View>
+      <CRTOverlay />
     </SafeAreaView>
   );
 };
@@ -170,9 +208,10 @@ const getStyles = (COLORS) => StyleSheet.create({
     alignItems: 'center',
     zIndex: 1,
     backgroundColor: COLORS.background,
+    marginVertical: 15,
   },
   trayWrapper: {
-    paddingTop: 20,
+    paddingTop: 10,
     paddingBottom: 20,
     borderTopWidth: 2,
     borderTopColor: COLORS.textPrimary,
@@ -193,6 +232,19 @@ const getStyles = (COLORS) => StyleSheet.create({
     textShadowColor: '#000000',
     textShadowOffset: { width: 2, height: 2 },
     textShadowRadius: 1,
+  },
+  pauseButton: {
+    marginTop: 30,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    backgroundColor: '#000000',
+  },
+  pauseButtonText: {
+    fontFamily: 'PressStart2P',
+    fontSize: 14,
+    color: '#FFFFFF',
   },
 });
 

@@ -21,7 +21,7 @@ const MiniPiece = ({ piece }) => {
              <Cell 
                key={`${piece.id}-mini-cell-${r}-${c}`}
                size={MINI_CELL_SIZE}
-               filled={cellFilled === 1}
+               value={cellFilled}
                isGhost={false}
              />
           ))}
@@ -40,6 +40,7 @@ const PieceTray = ({ trayPieces, onDragUpdate, onDragEnd }) => {
         {trayPieces.map((piece, i) => (
           <View key={`tray-slot-${i}`} style={styles.slot}>
             <Piece 
+               key={piece ? piece.id : `empty-${i}`}
                piece={piece} 
                index={i} 
                onDragUpdate={onDragUpdate} 

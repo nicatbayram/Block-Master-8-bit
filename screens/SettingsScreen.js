@@ -4,6 +4,50 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../contexts/ThemeContext';
 import CornerMask from '../components/CornerMask';
 
+const RetroSwitch = ({ value, onValueChange, COLORS }) => {
+  return (
+    <TouchableOpacity 
+      activeOpacity={1} 
+      onPress={() => onValueChange(!value)}
+      style={{
+        width: 60,
+        height: 28,
+        backgroundColor: COLORS.background,
+        borderWidth: 2,
+        borderColor: COLORS.textPrimary,
+        padding: 2,
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: value ? 'flex-end' : 'flex-start'
+      }}
+    >
+      {/* Switch Track Shadow/Depth */}
+      <View style={{
+        ...StyleSheet.absoluteFillObject,
+        borderTopWidth: 2,
+        borderLeftWidth: 2,
+        borderColor: 'rgba(0,0,0,0.3)',
+      }} />
+      
+      {/* Switch Thumb */}
+      <View style={{
+        width: 24,
+        height: 20,
+        backgroundColor: COLORS.textPrimary,
+        borderWidth: 1,
+        borderColor: COLORS.background,
+      }}>
+         {/* Thumb Ridges */}
+         <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly', alignItems: 'center' }}>
+            <View style={{ width: 2, height: 12, backgroundColor: COLORS.background, opacity: 0.5 }} />
+            <View style={{ width: 2, height: 12, backgroundColor: COLORS.background, opacity: 0.5 }} />
+            <View style={{ width: 2, height: 12, backgroundColor: COLORS.background, opacity: 0.5 }} />
+         </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
 const SettingsScreen = ({ navigation }) => {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [vibrationEnabled, setVibrationEnabled] = useState(true);
@@ -35,11 +79,10 @@ const SettingsScreen = ({ navigation }) => {
           <Text style={styles.settingText}>THEME</Text>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Text style={[styles.settingText, { fontSize: 10, marginRight: 8 }]}>LIGHT</Text>
-            <Switch 
+            <RetroSwitch 
                value={isDarkMode} 
                onValueChange={toggleTheme} 
-               trackColor={{ false: COLORS.background, true: COLORS.textPrimary }}
-               thumbColor={isDarkMode ? COLORS.background : COLORS.textPrimary}
+               COLORS={COLORS}
             />
             <Text style={[styles.settingText, { fontSize: 10, marginLeft: 8 }]}>DARK</Text>
           </View>
@@ -47,21 +90,19 @@ const SettingsScreen = ({ navigation }) => {
 
         <View style={styles.settingRow}>
           <Text style={styles.settingText}>SOUND</Text>
-          <Switch 
+          <RetroSwitch 
              value={soundEnabled} 
              onValueChange={setSoundEnabled} 
-             trackColor={{ false: COLORS.background, true: COLORS.textPrimary }}
-             thumbColor={soundEnabled ? COLORS.background : COLORS.textPrimary}
+             COLORS={COLORS}
           />
         </View>
 
         <View style={[styles.settingRow, { borderBottomWidth: 0 }]}>
           <Text style={styles.settingText}>HAPTICS</Text>
-          <Switch 
+          <RetroSwitch 
              value={vibrationEnabled} 
              onValueChange={setVibrationEnabled} 
-             trackColor={{ false: COLORS.background, true: COLORS.textPrimary }}
-             thumbColor={vibrationEnabled ? COLORS.background : COLORS.textPrimary}
+             COLORS={COLORS}
           />
         </View>
       </View>

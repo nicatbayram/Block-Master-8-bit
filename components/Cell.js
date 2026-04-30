@@ -2,23 +2,22 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { BLOCK_COLORS_LIGHT, BLOCK_COLORS_DARK } from '../constants/colors';
-import CornerMask from './CornerMask';
 
-const Cell = ({ size, filled, isGhost }) => {
+const Cell = ({ size, value, isGhost }) => {
   const { colors: COLORS } = useTheme();
   const styles = getStyles(COLORS);
-  if (!filled) return <View style={{ width: size, height: size }} />;
+  
+  if (!value && !isGhost) return <View style={{ width: size, height: size }} />;
 
-  const p = 1.8; // Multiplier size per pixel
+  const isStone = value === 2;
 
   return (
     <View style={{ width: size, height: size }}>
-       <View style={[styles.block, isGhost ? styles.ghost : styles.placed]}>
-          <CornerMask top left p={p} />
-          <CornerMask top right p={p} />
-          <CornerMask bottom left p={p} />
-          <CornerMask bottom right p={p} />
-       </View>
+       <View style={[
+         styles.block, 
+         isGhost ? styles.ghost : styles.placed,
+         isStone && styles.stone
+       ]} />
     </View>
   );
 };
@@ -27,7 +26,11 @@ const getStyles = (COLORS) => StyleSheet.create({
   block: {
     flex: 1,
     margin: 1, 
-    position: 'relative',
+    borderWidth: 3,
+    borderTopColor: 'rgba(255,255,255,0.4)',
+    borderLeftColor: 'rgba(255,255,255,0.4)',
+    borderBottomColor: 'rgba(0,0,0,0.4)',
+    borderRightColor: 'rgba(0,0,0,0.4)',
   },
   placed: {
     backgroundColor: COLORS.block, 
@@ -37,6 +40,12 @@ const getStyles = (COLORS) => StyleSheet.create({
     borderWidth: 2,
     borderColor: COLORS.textPrimary,
     borderStyle: 'dashed',
+  },
+  stone: {
+    backgroundColor: COLORS.gridLines,
+    borderWidth: 4,
+    borderTopColor: COLORS.emptyCellBorder,
+    borderLeftColor: COLORS.emptyCellBorder,
   }
 });
 

@@ -3,13 +3,16 @@ import { createEmptyBoard, canPlacePiece, placePiece, checkAndClearLines, checkG
 import { generateInitialTray, generateInitialQueue, generateRandomPiece } from '../utils/pieceGenerator';
 import { calculateScore } from '../utils/scoreCalculator';
 import { playSound } from '../utils/audio';
+import * as Haptics from 'expo-haptics';
 
 export const useGameState = () => {
   const [board, setBoard] = useState(createEmptyBoard());
   const [score, setScore] = useState(0);
-  const [trayPieces, setTrayPieces] = useState(generateInitialTray());
-  const [queuePieces, setQueuePieces] = useState(generateInitialQueue());
-  const [gravityFlipUsed, setGravityFlipUsed] = useState(false);
+  const level = Math.floor(score / 1000) + 1;
+  const [trayPieces, setTrayPieces] = useState(generateInitialTray(level));
+  const [queuePieces, setQueuePieces] = useState(generateInitialQueue(level));
+  const [turnsLeft, setTurnsLeft] = useState(3);
+  const [rerollsLeft, setRerollsLeft] = useState(3);
   const [comboCount, setComboCount] = useState(0);
   const [lastLinesCleared, setLastLinesCleared] = useState(0);
   const [lastAddedScore, setLastAddedScore] = useState(0);
@@ -24,6 +27,9 @@ export const useGameState = () => {
     if (!canPlacePiece(board, piece.shape, row, col)) {
       return false; // Invalid move
     }
+
+    // Vibrate lightly when a block is placed
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     const { newBoard, blocksPlaced } = placePiece(board, piece.shape, row, col);
     const { newBoard: clearedBoard, linesCleared, clearedRows, clearedCols, clearedSubgrids } = checkAndClearLines(newBoard);
@@ -41,6 +47,9 @@ export const useGameState = () => {
     if (linesCleared > 0) {
       setClearedAreas({ rows: clearedRows, cols: clearedCols, subgrids: clearedSubgrids, id: Date.now() });
       
+      // Heavy haptics for line clear
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
       // Trigger sounds based on clear type
       const hasRows = clearedRows.length > 0;
       const hasCols = clearedCols.length > 0;
@@ -65,8 +74,16 @@ export const useGameState = () => {
     const baseScore = calculateScore(blocksPlaced, linesCleared);
     const bonus = newCombo > 1 ? baseScore * (newCombo - 1) : 0;
     const totalAdded = baseScore + bonus;
+    const newScore = score + totalAdded;
+    const currentLevel = Math.floor(newScore / 1000) + 1;
+    const previousLevel = Math.floor(score / 1000) + 1;
     
-    setScore(prev => prev + totalAdded);
+    if (currentLevel > previousLevel) {
+      setRerollsLeft(prev => prev <= 0 ? 1 : prev);
+      playSound('cube'); // Play a sound for level up
+    }
+    
+    setScore(newScore);
     setLastAddedScore(totalAdded);
     
     setBoard(clearedBoard);
@@ -79,7 +96,7 @@ export const useGameState = () => {
     const allEmpty = newTray.every(p => p === null);
     let nextTray = newTray;
     if (allEmpty) {
-      nextTray = [generateRandomPiece(), generateRandomPiece(), generateRandomPiece()];
+      nextTray = [generateRandomPiece(currentLevel), generateRandomPiece(currentLevel), generateRandomPiece(currentLevel)];
     }
     setTrayPieces(nextTray);
 
@@ -91,7 +108,7 @@ export const useGameState = () => {
     }
 
     return true; // Move successful
-  }, [board, trayPieces, comboCount]);
+  }, [board, trayPieces, comboCount, score]);
 
   const togglePause = useCallback(() => {
     setIsPaused(prev => !prev);
@@ -99,7 +116,7 @@ export const useGameState = () => {
   }, []);
 
   const handleGravityFlip = useCallback(() => {
-    if (gravityFlipUsed) return false;
+    if (turnsLeft <= 0) return false;
     
     const flippedBoard = applyGravityFlip(board);
     const { newBoard: clearedBoard, linesCleared, clearedRows, clearedCols, clearedSubgrids } = checkAndClearLines(flippedBoard);
@@ -113,7 +130,7 @@ export const useGameState = () => {
     }
     
     setBoard(clearedBoard);
-    setGravityFlipUsed(true);
+    setTurnsLeft(prev => prev - 1);
 
     const activePieces = trayPieces.filter(p => p !== null);
     if (checkGameOver(clearedBoard, activePieces)) {
@@ -121,7 +138,15 @@ export const useGameState = () => {
     }
 
     return true;
-  }, [board, gravityFlipUsed, trayPieces]);
+  }, [board, turnsLeft, trayPieces]);
+
+  const handleReroll = useCallback(() => {
+    if (rerollsLeft <= 0) return false;
+    setTrayPieces(generateInitialTray(level));
+    setRerollsLeft(prev => prev - 1);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    return true;
+  }, [rerollsLeft]);
 
   const resetGame = useCallback(() => {
     setBoard(createEmptyBoard());
@@ -129,9 +154,10 @@ export const useGameState = () => {
     setComboCount(0);
     setLastAddedScore(0);
     setLastLinesCleared(0);
-    setTrayPieces(generateInitialTray());
-    setQueuePieces(generateInitialQueue());
-    setGravityFlipUsed(false);
+    setTrayPieces(generateInitialTray(1));
+    setQueuePieces(generateInitialQueue(1));
+    setTurnsLeft(3);
+    setRerollsLeft(3);
     setIsGameOver(false);
     setClearedAreas(null);
   }, []);
@@ -139,17 +165,20 @@ export const useGameState = () => {
   return {
     board,
     score,
+    level,
     comboCount,
     lastLinesCleared,
     lastAddedScore,
     trayPieces,
     queuePieces,
-    gravityFlipUsed,
+    turnsLeft,
+    rerollsLeft,
     isGameOver,
     isPaused,
     clearedAreas,
     handlePlacePiece,
     handleGravityFlip,
+    handleReroll,
     togglePause,
     resetGame,
   };

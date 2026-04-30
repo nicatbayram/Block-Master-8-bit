@@ -6,10 +6,11 @@ import { BOARD_SIZE } from '../utils/boardLogic';
 import { useTheme } from '../contexts/ThemeContext';
 import { BLOCK_COLORS_LIGHT, BLOCK_COLORS_DARK } from '../constants/colors';
 
-const { width } = Dimensions.get('window');
-const BOARD_PADDING = 20;
-const BOARD_TOTAL_WIDTH = width - BOARD_PADDING * 2;
-export const CELL_SIZE = Math.floor(BOARD_TOTAL_WIDTH / BOARD_SIZE);
+const { width, height } = Dimensions.get('window');
+const BOARD_PADDING = 10; // Reduce padding to save space
+// Limit board size so it doesn't overflow vertically on shorter screens
+const MAX_BOARD_SIZE = Math.min(width - BOARD_PADDING * 1, height * 0.5); 
+export const CELL_SIZE = Math.floor(MAX_BOARD_SIZE / BOARD_SIZE);
 
 const Board = forwardRef(({ board, ghostPiece, ghostPos, onGridLayout, clearedAreas }, ref) => {
   const { colors: COLORS } = useTheme();
@@ -47,9 +48,8 @@ const Board = forwardRef(({ board, ghostPiece, ghostPos, onGridLayout, clearedAr
                  >
                     <Cell 
                       size={CELL_SIZE} 
-                      filled={cellState === 1 || showGhost} 
+                      value={cellState} 
                       isGhost={showGhost} 
-                      isActive={false} 
                     />
                     {isExploding && <RetroExplosion key={`expl-${clearedAreas.id}`} />}
                  </View>

@@ -79,18 +79,29 @@ export const checkAndClearLines = (board) => {
   const linesCleared = rowsToClear.size + colsToClear.size + subgridsToClear.length;
   const newBoard = board.map(row => [...row]);
 
-  // Actually clear
+  const cellsToClear = new Set();
+  
   rowsToClear.forEach(r => {
-    for (let c = 0; c < BOARD_SIZE; c++) newBoard[r][c] = 0;
+    for (let c = 0; c < BOARD_SIZE; c++) cellsToClear.add(`${r},${c}`);
   });
   colsToClear.forEach(c => {
-    for (let r = 0; r < BOARD_SIZE; r++) newBoard[r][c] = 0;
+    for (let r = 0; r < BOARD_SIZE; r++) cellsToClear.add(`${r},${c}`);
   });
   subgridsToClear.forEach(({ rowStart, colStart }) => {
     for (let sr = 0; sr < 3; sr++) {
       for (let sc = 0; sc < 3; sc++) {
-        newBoard[rowStart + sr][colStart + sc] = 0;
+        cellsToClear.add(`${rowStart + sr},${colStart + sc}`);
       }
+    }
+  });
+
+  // Actually clear or damage blocks
+  cellsToClear.forEach(coord => {
+    const [r, c] = coord.split(',').map(Number);
+    if (newBoard[r][c] === 2) {
+      newBoard[r][c] = 1; // Stone becomes normal block
+    } else {
+      newBoard[r][c] = 0;
     }
   });
 

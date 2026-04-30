@@ -27,8 +27,8 @@ const Piece = ({ piece, onDragEnd, onDragUpdate, index }) => {
     })
     .onEnd((event) => {
       isDragging.value = false;
-      translateX.value = withSpring(0, { damping: 14, stiffness: 150 });
-      translateY.value = withSpring(0, { damping: 14, stiffness: 150 });
+      translateX.value = withTiming(0, { duration: 1 });
+      translateY.value = withTiming(0, { duration: 1 });
       
       if (onDragEnd) {
         runOnJS(onDragEnd)(event.absoluteX, event.absoluteY - 80, piece, index);
@@ -40,21 +40,17 @@ const Piece = ({ piece, onDragEnd, onDragUpdate, index }) => {
       transform: [
         { translateX: translateX.value },
         { translateY: translateY.value },
-        { scale: withSpring(isDragging.value ? 1.15 / PIECE_SCALE : 1, { 
-            damping: 14, 
-            stiffness: 150 
-          }) 
-        }
+        { scale: isDragging.value ? withSpring(1.15 / PIECE_SCALE, { damping: 14, stiffness: 150 }) : withTiming(1, { duration: 1 }) }
       ],
       zIndex: isDragging.value ? 1000 : 1,
-      opacity: withTiming(isDragging.value ? 0.9 : 1, { duration: 150 }),
+      opacity: isDragging.value ? 0.9 : 1,
       shadowColor: '#000',
       shadowOffset: {
         width: 0,
-        height: withTiming(isDragging.value ? 12 : 0, { duration: 150 }),
+        height: isDragging.value ? 12 : 0,
       },
-      shadowOpacity: withTiming(isDragging.value ? 0.5 : 0, { duration: 150 }),
-      shadowRadius: withTiming(isDragging.value ? 15 : 0, { duration: 150 }),
+      shadowOpacity: isDragging.value ? 0.5 : 0,
+      shadowRadius: isDragging.value ? 15 : 0,
       elevation: isDragging.value ? 15 : 0,
     };
   });
@@ -70,8 +66,8 @@ const Piece = ({ piece, onDragEnd, onDragUpdate, index }) => {
           <View key={`${piece.id}-row-${r}`} style={styles.row}>
             {row.map((cellFilled, c) => (
               <View key={`${piece.id}-cell-${r}-${c}`} style={{ width: CELL_SIZE * PIECE_SCALE, height: CELL_SIZE * PIECE_SCALE }}>
-                {cellFilled === 1 && (
-                    <Cell size={CELL_SIZE * PIECE_SCALE} filled={true} isActive={true} />
+                {cellFilled > 0 && (
+                    <Cell size={CELL_SIZE * PIECE_SCALE} value={cellFilled} isActive={true} />
                 )}
               </View>
             ))}

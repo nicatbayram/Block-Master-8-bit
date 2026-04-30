@@ -1,53 +1,53 @@
 export const BLOCK_COLORS_LIGHT = [
-  { highlight: '#535353', base: '#535353', shadow: '#535353' },
+  { highlight: '#306230', base: '#0f380f', shadow: '#0f380f' }, // Gameboy dark green
 ];
 
 export const BLOCK_COLORS_DARK = [
-  { highlight: '#C56BFF', base: '#7A00CC', shadow: '#7A00CC' }, 
+  { highlight: '#E0FFFF', base: '#00FFFF', shadow: '#008080' }, // Neon Arcade Cyan
 ];
 
 export const lightTheme = {
-  background: '#FFFFFF',
-  boardBg: '#FFFFFF',
-  emptyCellBg: '#FFFFFF',
-  emptyCellBorder: '#535353',
-  gridLines: '#EEEEEE',
-  block: '#646363', // Pale gray exclusively for game pieces (old light mode)
-  textPrimary: '#535353',
-  textSecondary: '#535353',
-  gold: '#535353',
-  orange: '#535353',
-  white: '#FFFFFF',
-  cardBg: '#FFFFFF',
-  cardBorder: '#535353',
-  buttonPrimary: '#535353',
-  buttonPrimaryHover: '#535353',
-  destructive: '#535353',
-  clearFlash: '#535353',
+  background: '#ffffffff', // Classic Gameboy pea green
+  boardBg: '#ffffffff',
+  emptyCellBg: '#ffffffff',
+  emptyCellBorder: '#8bac0f',
+  gridLines: '#a1a1a1ff',
+  block: '#0f380f',
+  textPrimary: '#0f380f', // Darkest green for text
+  textSecondary: '#306230',
+  gold: '#0f380f',
+  orange: '#0f380f',
+  white: '#9bbc0f',
+  cardBg: '#8bac0f',
+  cardBorder: '#0f380f',
+  buttonPrimary: '#0f380f',
+  buttonPrimaryHover: '#306230',
+  destructive: '#0f380f',
+  clearFlash: '#FFFFFF',
   blockColors: BLOCK_COLORS_LIGHT,
 };
 
 export const darkTheme = {
-  background: '#000000',
-  boardBg: '#000000',
-  emptyCellBg: '#000000',
-  emptyCellBorder: '#7A00CC', // user requested to be purple (not gray)
-  gridLines: '#4A4A4A',
-  block: '#7a04c9ff', // user requested small piece blocks to be purple
-  textPrimary: '#A020F0', 
-  textSecondary: '#C56BFF',
-  gold: '#A020F0',
-  orange: '#A020F0',
+  background: '#000A14', // Deep arcade cabinet shadow
+  boardBg: '#00050A', // Darkest blue for board
+  emptyCellBg: '#00050A',
+  emptyCellBorder: '#00334D', // Faint glowing teal borders
+  gridLines: '#00334D', // Faint teal grid
+  block: '#00FFFF', // Neon Cyan blocks
+  textPrimary: '#00FFFF', // Neon Cyan text
+  textSecondary: '#008080',
+  gold: '#00FFFF',
+  orange: '#00FFFF',
   white: '#FFFFFF',
-  cardBg: '#0A0A0A',
-  cardBorder: '#A020F0',
-  buttonPrimary: '#A020F0',
-  buttonPrimaryHover: '#C56BFF',
+  cardBg: '#001A29',
+  cardBorder: '#00FFFF',
+  buttonPrimary: '#00FFFF',
+  buttonPrimaryHover: '#E0FFFF',
   destructive: '#FF0055',
   clearFlash: '#FFFFFF',
   blockColors: BLOCK_COLORS_DARK,
 };
 
 // Maintain fallback exports temporarily until refactor completes
-export const COLORS = darkTheme;
+export const COLORS = darkTheme; // Set back to darkTheme to show the user
 export const BLOCK_COLORS = BLOCK_COLORS_DARK;

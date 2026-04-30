@@ -9,17 +9,23 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { useTheme } from '../contexts/ThemeContext';
+import { useHighScore } from '../hooks/useHighScore';
 import { BLOCK_COLORS_LIGHT, BLOCK_COLORS_DARK } from '../constants/colors';
 
 const GameOverScreen = ({ navigation, route }) => {
   const { colors: COLORS } = useTheme();
   const styles = getStyles(COLORS);
-  const { score, isNewRecord } = route.params || {};
+  const { score } = route.params || {};
+  
+  const { isLeaderboardEligible, saveToLeaderboard, leaderboard } = useHighScore();
+  const [initials, setInitials] = useState('');
+  const [isSaved, setIsSaved] = useState(false);
+  const eligible = score > 0 && isLeaderboardEligible(score);
   
   const blinkOpacity = useSharedValue(1);
 
   useEffect(() => {
-    if (isNewRecord) {
+    if (eligible && !isSaved) {
       blinkOpacity.value = withRepeat(
         withSequence(
           withTiming(0, { duration: 100 }),
@@ -29,7 +35,24 @@ const GameOverScreen = ({ navigation, route }) => {
         true
       );
     }
-  }, [isNewRecord]);
+  }, [eligible, isSaved]);
+
+  const handleCharInput = (char) => {
+    if (initials.length < 3) {
+      setInitials(prev => prev + char);
+    }
+  };
+
+  const handleBackspace = () => {
+    setInitials(prev => prev.slice(0, -1));
+  };
+
+  const handleSubmit = () => {
+    if (initials.length === 3) {
+      saveToLeaderboard(initials, score);
+      setIsSaved(true);
+    }
+  };
 
   const blinkStyle = useAnimatedStyle(() => ({
     opacity: blinkOpacity.value,
@@ -42,34 +65,66 @@ const GameOverScreen = ({ navigation, route }) => {
           <Text style={styles.title}>GAME OVER</Text>
         </View>
         
-        {isNewRecord && (
-          <Animated.View style={[styles.recordContainer, blinkStyle]}>
-            <Text style={styles.recordText}>NEW RECORD!</Text>
-          </Animated.View>
+        {eligible && !isSaved ? (
+          <View style={{ alignItems: 'center', marginBottom: 20, width: '100%' }}>
+            <Animated.View style={[styles.recordContainer, blinkStyle]}>
+              <Text style={styles.recordText}>HIGH SCORE!</Text>
+            </Animated.View>
+            <Text style={styles.scoreLabel}>SCORE</Text>
+            <Text style={styles.scoreValue}>{(score || 0).toString().padStart(6, '0')}</Text>
+            <Text style={[styles.scoreLabel, { marginTop: 20 }]}>ENTER INITIALS</Text>
+            <View style={{ flexDirection: 'row', gap: 10, marginVertical: 10 }}>
+              {[0, 1, 2].map(i => (
+                <View key={i} style={{ borderBottomWidth: 4, borderColor: COLORS.textPrimary, width: 40, alignItems: 'center' }}>
+                  <Text style={{ fontFamily: 'PressStart2P', fontSize: 32, color: COLORS.textPrimary }}>
+                    {initials[i] || ' '}
+                  </Text>
+                </View>
+              ))}
+            </View>
+            {/* Simple Keyboard */}
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 10, paddingHorizontal: 10 }}>
+              {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('').map(char => (
+                <TouchableOpacity key={char} onPress={() => handleCharInput(char)} style={{ padding: 10 }}>
+                  <Text style={{ fontFamily: 'PressStart2P', fontSize: 20, color: COLORS.textPrimary }}>{char}</Text>
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity onPress={handleBackspace} style={{ padding: 10 }}>
+                <Text style={{ fontFamily: 'PressStart2P', fontSize: 20, color: COLORS.destructive }}>DEL</Text>
+              </TouchableOpacity>
+            </View>
+            {initials.length === 3 && (
+              <TouchableOpacity style={[styles.actionButton, { marginTop: 20 }]} onPress={handleSubmit}>
+                <Text style={styles.actionButtonText}>SAVE</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        ) : (
+          <>
+            <View style={styles.scoreContainer}>
+              <Text style={styles.scoreLabel}>SCORE</Text>
+              <Text style={styles.scoreValue}>{(score || 0).toString().padStart(6, '0')}</Text>
+            </View>
+
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                 style={styles.actionButton} 
+                 onPress={() => navigation.replace('Game')}
+                 activeOpacity={1}
+              >
+                <Text style={styles.actionButtonText}>RETRY</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                 style={[styles.actionButton, styles.secondaryButton]} 
+                 onPress={() => navigation.navigate('Home')}
+                 activeOpacity={1}
+              >
+                <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>TITLE</Text>
+              </TouchableOpacity>
+            </View>
+          </>
         )}
-
-        <View style={styles.scoreContainer}>
-          <Text style={styles.scoreLabel}>SCORE</Text>
-          <Text style={styles.scoreValue}>{(score || 0).toString().padStart(6, '0')}</Text>
-        </View>
-
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity 
-             style={styles.actionButton} 
-             onPress={() => navigation.replace('Game')}
-             activeOpacity={1}
-          >
-            <Text style={styles.actionButtonText}>RETRY</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-             style={[styles.actionButton, styles.secondaryButton]} 
-             onPress={() => navigation.navigate('Home')}
-             activeOpacity={1}
-          >
-            <Text style={[styles.actionButtonText, styles.secondaryButtonText]}>TITLE</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </SafeAreaView>
   );
