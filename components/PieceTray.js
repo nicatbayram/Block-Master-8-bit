@@ -21,7 +21,7 @@ const MiniPiece = ({ piece }) => {
              <Cell 
                key={`${piece.id}-mini-cell-${r}-${c}`}
                size={MINI_CELL_SIZE}
-               value={cellFilled}
+               filled={cellFilled === 1}
                isGhost={false}
              />
           ))}
